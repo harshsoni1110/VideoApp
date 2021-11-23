@@ -91,6 +91,8 @@ class AllVideosViewModel(private val context: Application) : AndroidViewModel(co
         val downloadManager =
             context.getSystemService(FragmentActivity.DOWNLOAD_SERVICE) as DownloadManager
         val downloadId = downloadManager.enqueue(request)
+        video.videoStatus = VideoStatus.DOWNLOADING
+        allVideos.postValue(videoList)
         Log.d("Downloading..", downloadId.toString())
     }
 
