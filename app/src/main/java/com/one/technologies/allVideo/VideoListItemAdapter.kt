@@ -32,14 +32,10 @@ class VideoListItemAdapter(
         val prgVideoProcessing: ProgressBar = view.findViewById(R.id.prgVideoProcessing)
         val imgThumbnail: ImageView = view.findViewById(R.id.imgThumbnail)
 
-        init {
-            // Define click listener for the ViewHolder's View.
-        }
     }
 
-    // Create new views (invoked by the layout manager)
+
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        // Create a new view, which defines the UI of the list item
         val view = LayoutInflater.from(viewGroup.context)
             .inflate(R.layout.video_list_item, viewGroup, false)
         val vh = ViewHolder(view)
@@ -52,7 +48,6 @@ class VideoListItemAdapter(
         return vh
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
 
         val video = dataSet[position]
@@ -86,7 +81,6 @@ class VideoListItemAdapter(
 
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount() = dataSet.size
 
 }

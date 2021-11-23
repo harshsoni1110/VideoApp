@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -62,7 +61,7 @@ class AllVideoActivity : FragmentActivity(), VideoListItemClickListener {
         fileName = fileName.substring(0, 1).uppercase(Locale.getDefault()) + fileName.substring(1)
         val file: File = File(this.getExternalFilesDir(null)?.absolutePath + fileName)
         if (file.exists()) {
-            Log.d("FILE EXISTS", file.exists().toString())
+
             val i = Intent(this, VideoPlayerActivity::class.java)
             i.putExtra(videoUrlPath, file.absolutePath)
             startActivity(i)

@@ -1,17 +1,23 @@
 package com.one.technologies.videoPlayer
 
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.MediaController
+
 import android.widget.VideoView
+import androidx.annotation.RequiresApi
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.FragmentActivity
 import com.one.technologies.R
+
 
 const val videoUrlPath = "videoUrlPath"
 
 class VideoPlayerActivity : FragmentActivity() {
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.video_player)
@@ -32,11 +38,11 @@ class VideoPlayerActivity : FragmentActivity() {
             videoView.start()
         }
 
-    }
+        val toolbar: Toolbar = findViewById<View>(R.id.toolbar2) as Toolbar
 
-    override fun onDestroy() {
-        super.onDestroy()
-
+        toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
     }
 
 }
