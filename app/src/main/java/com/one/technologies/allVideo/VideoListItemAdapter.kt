@@ -6,10 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
+import com.bumptech.glide.Glide
 import com.one.technologies.R
 import com.one.technologies.allVideo.models.Video
 import com.one.technologies.allVideo.models.VideoStatus
@@ -28,6 +30,7 @@ class VideoListItemAdapter(
         val txtVideoName: TextView = view.findViewById(R.id.txtVideoName)
         val btnDownload: Button = view.findViewById(R.id.btnDownload)
         val prgVideoProcessing: ProgressBar = view.findViewById(R.id.prgVideoProcessing)
+        val imgThumbnail: ImageView = view.findViewById(R.id.imgThumbnail)
 
         init {
             // Define click listener for the ViewHolder's View.
@@ -54,12 +57,31 @@ class VideoListItemAdapter(
 
         val video = dataSet[position]
         viewHolder.txtVideoName.text = video.title
-        viewHolder.prgVideoProcessing.visibility = View.GONE
-        if (video.videoStatus == VideoStatus.DOWNLOADED) {
-            viewHolder.btnDownload.text = viewHolder.btnDownload.context.getString(R.string.play)
-        } else {
-            viewHolder.btnDownload.text =
-                viewHolder.btnDownload.context.getString(R.string.download)
+        val videoUrl = video.sources!![0]
+        val fileName: String = videoUrl.substring(0, videoUrl.lastIndexOf('/'))
+        Glide
+            .with(viewHolder.imgThumbnail)
+            .load(fileName + "/"+ video.thumb)
+            .centerCrop()
+            .into(viewHolder.imgThumbnail);
+
+        when (video.videoStatus) {
+            VideoStatus.DOWNLOADING -> {
+                viewHolder.prgVideoProcessing.visibility = View.VISIBLE
+                viewHolder.btnDownload.visibility = View.GONE
+            }
+            VideoStatus.DOWNLOADED -> {
+                viewHolder.btnDownload.text =
+                    viewHolder.btnDownload.context.getString(R.string.play)
+                viewHolder.prgVideoProcessing.visibility = View.GONE
+                viewHolder.btnDownload.visibility = View.VISIBLE
+            }
+            else -> {
+                viewHolder.prgVideoProcessing.visibility = View.GONE
+                viewHolder.btnDownload.visibility = View.VISIBLE
+                viewHolder.btnDownload.text =
+                    viewHolder.btnDownload.context.getString(R.string.download)
+            }
         }
 
     }
