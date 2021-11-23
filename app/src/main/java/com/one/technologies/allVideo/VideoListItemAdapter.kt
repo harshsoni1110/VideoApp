@@ -54,12 +54,23 @@ class VideoListItemAdapter(
 
         val video = dataSet[position]
         viewHolder.txtVideoName.text = video.title
-        viewHolder.prgVideoProcessing.visibility = View.GONE
-        if (video.videoStatus == VideoStatus.DOWNLOADED) {
-            viewHolder.btnDownload.text = viewHolder.btnDownload.context.getString(R.string.play)
-        } else {
-            viewHolder.btnDownload.text =
-                viewHolder.btnDownload.context.getString(R.string.download)
+
+        when (video.videoStatus) {
+            VideoStatus.DOWNLOADING -> {
+                viewHolder.prgVideoProcessing.visibility = View.VISIBLE
+                viewHolder.btnDownload.visibility = View.GONE
+            }
+            VideoStatus.DOWNLOADED -> {
+                viewHolder.btnDownload.text = viewHolder.btnDownload.context.getString(R.string.play)
+                viewHolder.prgVideoProcessing.visibility = View.GONE
+                viewHolder.btnDownload.visibility = View.VISIBLE
+            }
+            else -> {
+                viewHolder.prgVideoProcessing.visibility = View.GONE
+                viewHolder.btnDownload.visibility = View.VISIBLE
+                viewHolder.btnDownload.text =
+                    viewHolder.btnDownload.context.getString(R.string.download)
+            }
         }
 
     }
