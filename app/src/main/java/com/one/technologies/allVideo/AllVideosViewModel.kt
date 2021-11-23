@@ -22,11 +22,19 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class AllVideosViewModel(private val context: Application) : AndroidViewModel(context) {
+
+    /**
+     * Backed list of the videos
+     */
     val videoList = ArrayList<Video>()
+
+    /**
+     * LiveData to observer all videos listing changes and update UI
+     */
     val allVideos = MutableLiveData<ArrayList<Video>>(videoList)
 
     init {
-
+        //Start parsing the JSON as soon as screen is launched
         viewModelScope.launch {
             val string = getJsonDataFromAsset(context, "sample_json.txt")
 
@@ -40,6 +48,10 @@ class AllVideosViewModel(private val context: Application) : AndroidViewModel(co
         }
     }
 
+    /**
+     * Check for the file exist of each video parsed
+     * This will help to render Play or Download button on UI
+     */
     fun checkForExistingDownloads() {
         viewModelScope.launch {
             videoList.forEach { video ->
@@ -61,6 +73,9 @@ class AllVideosViewModel(private val context: Application) : AndroidViewModel(co
         }
     }
 
+    /**
+     * Trigger downloading of the video
+     */
     fun downloadVideo(video: Video) {
         val videoUrl = video.sources!![0]
         var fileName: String = videoUrl.substring(videoUrl.lastIndexOf('/') + 1)
@@ -77,54 +92,6 @@ class AllVideosViewModel(private val context: Application) : AndroidViewModel(co
             context.getSystemService(FragmentActivity.DOWNLOAD_SERVICE) as DownloadManager
         val downloadId = downloadManager.enqueue(request)
         Log.d("Downloading..", downloadId.toString())
-
-        // using query method
-        var finishDownload = false
-        var progress = 0
-        while (!finishDownload) {
-            val cursor = downloadManager.query(DownloadManager.Query().setFilterById(downloadId))
-            if (cursor.moveToFirst()) {
-                val columnStatus = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
-                val status = cursor!!.getInt(columnStatus)
-                when (status) {
-                    DownloadManager.STATUS_FAILED -> {
-                        val reasonStatus = cursor.getColumnIndex(DownloadManager.COLUMN_REASON)
-                        Log.d("DOWNLOADING..", "Failed ${cursor.getString(reasonStatus)}")
-
-                        finishDownload = true;
-                    }
-                    DownloadManager.STATUS_PAUSED -> {
-
-                    }
-                    DownloadManager.STATUS_PENDING -> {
-                    }
-                    DownloadManager.STATUS_RUNNING -> {
-//                        if (videoList.contains(video)) {
-//                            video.videoStatus = VideoStatus.DOWNLOADING
-//                            allVideos.postValue(videoList)
-//                        }
-//                        val total =
-//                            cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
-//                        if (total >= 0) {
-//                            val downloaded =
-//                                cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
-//                            progress = ((downloaded * 100L) / total).toInt()
-//                            // if you use downloadmanger in async task, here you can use like this to display progress.
-//                            // Don't forget to do the division in long to get more digits rather than double.
-//                            //  publishProgress((int) ((downloaded * 100L) / total));
-//                        }
-                        break;
-                    }
-                    DownloadManager.STATUS_SUCCESSFUL -> {
-                        progress = 100;
-                        finishDownload = true
-                        checkForExistingDownloads()
-                        Toast.makeText(context, "Download Completed", Toast.LENGTH_SHORT).show();
-                        break;
-                    }
-                }
-            }
-        }
     }
 
     private fun getJsonDataFromAsset(context: Context, fileName: String): String? {
