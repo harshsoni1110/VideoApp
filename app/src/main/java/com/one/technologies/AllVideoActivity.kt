@@ -9,47 +9,42 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.one.technologies.allVideo.AllVideosViewModel
 import com.one.technologies.allVideo.VideoListItemAdapter
 import com.one.technologies.allVideo.VideoListItemClickListener
-import com.one.technologies.allVideo.models.AllVideos
 import com.one.technologies.allVideo.models.Video
+import com.one.technologies.utils.getViewModel
 import java.io.File
-import java.io.IOException
 import java.util.*
-import kotlin.collections.ArrayList
 
 
-class AllVideoActivity : AppCompatActivity(), VideoListItemClickListener {
+class AllVideoActivity : FragmentActivity(), VideoListItemClickListener {
+    private lateinit var allVideoAdapter: VideoListItemAdapter
+    val viewModel: AllVideosViewModel by lazy {
+        getViewModel { AllVideosViewModel(this.application) }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.all_video_screen)
         val rcyAllVideo = findViewById<RecyclerView>(R.id.rcyAllVideos)
-        val data = ArrayList<Video>()
-
-
-        val string = getJsonDataFromAsset(this, "sample_json.txt")
-        Log.d("VideoActivity", "Json data $string")
-
-        val gson = Gson()
-        val listPersonType = object : TypeToken<AllVideos>() {}.type
-
-        val persons: AllVideos = gson.fromJson(string, listPersonType)
-
-        persons.categories.forEachIndexed { idx, person -> Log.i("data", "> Item $idx:\n$person") }
-
+        allVideoAdapter = VideoListItemAdapter(viewModel.videoList, this@AllVideoActivity)
         rcyAllVideo.apply {
-            adapter = VideoListItemAdapter(persons.categories[0].videos, this@AllVideoActivity)
+            adapter = allVideoAdapter
             layoutManager = LinearLayoutManager(this.context)
         }
+
+        viewModel.allVideos.observe(this, {
+            allVideoAdapter.notifyDataSetChanged()
+        })
+
         registerReceiver(
             onDownloadComplete,
             IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-        );
+        )
 
     }
 
@@ -58,16 +53,6 @@ class AllVideoActivity : AppCompatActivity(), VideoListItemClickListener {
         unregisterReceiver(onDownloadComplete)
     }
 
-    fun getJsonDataFromAsset(context: Context, fileName: String): String? {
-        val jsonString: String
-        try {
-            jsonString = context.assets.open(fileName).bufferedReader().use { it.readText() }
-        } catch (ioException: IOException) {
-            ioException.printStackTrace()
-            return null
-        }
-        return jsonString
-    }
 
     override fun onDownloadClick(video: Video) {
         val videoUrl = video.sources!![0]
