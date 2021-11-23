@@ -6,11 +6,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import com.one.technologies.R
 import com.one.technologies.allVideo.models.Video
+import com.one.technologies.allVideo.models.VideoStatus
 
 interface VideoListItemClickListener {
     fun onDownloadClick(video: Video)
@@ -25,6 +27,7 @@ class VideoListItemAdapter(
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val txtVideoName: TextView = view.findViewById(R.id.txtVideoName)
         val btnDownload: Button = view.findViewById(R.id.btnDownload)
+        val prgVideoProcessing: ProgressBar = view.findViewById(R.id.prgVideoProcessing)
 
         init {
             // Define click listener for the ViewHolder's View.
@@ -49,9 +52,16 @@ class VideoListItemAdapter(
     // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
 
-        // Get element from your dataset at this position and replace the
-        // contents of the view with that element
-        viewHolder.txtVideoName.text = dataSet[position].title
+        val video = dataSet[position]
+        viewHolder.txtVideoName.text = video.title
+        viewHolder.prgVideoProcessing.visibility = View.GONE
+        if (video.videoStatus == VideoStatus.DOWNLOADED) {
+            viewHolder.btnDownload.text = viewHolder.btnDownload.context.getString(R.string.play)
+        } else {
+            viewHolder.btnDownload.text =
+                viewHolder.btnDownload.context.getString(R.string.download)
+        }
+
     }
 
     // Return the size of your dataset (invoked by the layout manager)

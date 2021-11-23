@@ -17,6 +17,8 @@ import com.one.technologies.allVideo.VideoListItemAdapter
 import com.one.technologies.allVideo.VideoListItemClickListener
 import com.one.technologies.allVideo.models.Video
 import com.one.technologies.utils.getViewModel
+import com.one.technologies.videoPlayer.VideoPlayerActivity
+import com.one.technologies.videoPlayer.videoUrlPath
 import java.io.File
 import java.util.*
 
@@ -55,18 +57,25 @@ class AllVideoActivity : FragmentActivity(), VideoListItemClickListener {
 
 
     override fun onDownloadClick(video: Video) {
+
         val videoUrl = video.sources!![0]
         var fileName: String = videoUrl.substring(videoUrl.lastIndexOf('/') + 1)
         fileName = fileName.substring(0, 1).uppercase(Locale.getDefault()) + fileName.substring(1)
         val file: File = File(this.getExternalFilesDir(null)?.absolutePath + fileName)
-
+        if (file.exists()) {
+            Log.d("FILE EXISTS", file.exists().toString())
+            val i = Intent(this, VideoPlayerActivity::class.java)
+            i.putExtra(videoUrlPath, file.absolutePath)
+            startActivity(i)
+            return
+        }
         val request = DownloadManager.Request(Uri.parse(videoUrl))
-            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED) // Visibility of the download Notification
-            .setDestinationUri(Uri.fromFile(file)) // Uri of the destination file
-            .setTitle(fileName) // Title of the Download Notification
-            .setDescription("Downloading") // Description of the Download Notification
-            .setAllowedOverMetered(true) // Set if download is allowed on Mobile network
-            .setAllowedOverRoaming(true) // Set if download is allowed on roaming network
+            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            .setDestinationUri(Uri.fromFile(file))
+            .setTitle(fileName)
+            .setDescription("Downloading")
+            .setAllowedOverMetered(true)
+            .setAllowedOverRoaming(true)
         val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         val downloadId = downloadManager.enqueue(request)
         Log.d("Downloading..", downloadId.toString())
